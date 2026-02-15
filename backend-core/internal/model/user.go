@@ -1,6 +1,5 @@
 package model
 
-// Definimos los estados posibles para las conexiones
 type ConnectionStatus string
 
 const (
@@ -21,15 +20,14 @@ type User struct {
 	Sessions []Session `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Accounts []Account `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
-	// Relaciones para las conexiones (Self-referencing many-to-many)
-	// Estas permiten cargar las solicitudes enviadas y recibidas
+	// Relaciones para las conexiones
 	ConnectionsSent     []Connection `gorm:"foreignKey:RequesterID"`
 	ConnectionsReceived []Connection `gorm:"foreignKey:ReceiverID"`
 }
 
 type Connection struct {
     ID          uint             `gorm:"primaryKey" json:"id"`
-    RequesterID string           `gorm:"not null;index" json:"requester_id"` // Añade etiquetas json
+    RequesterID string           `gorm:"not null;index" json:"requester_id"` 
     Requester   User             `gorm:"foreignKey:RequesterID" json:"-"`
     ReceiverID  string           `gorm:"not null;index" json:"receiver_id"`
     Receiver    User             `gorm:"foreignKey:ReceiverID" json:"-"`
