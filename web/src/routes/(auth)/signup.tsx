@@ -41,13 +41,10 @@ function RouteComponent() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center mb-4 relative">
-                <div className="absolute inset-0 bg-linear-to-r from-[#F97316] to-[#8B5CF6] rounded-2xl blur-xl opacity-30"></div>
-                <div className="w-20 h-20 bg-linear-to-br from-[#F97316] to-[#8B5CF6] rounded-2xl shadow-xl flex items-center justify-center relative">
-                  <span className="text-white text-4xl font-bold">IJ</span>
-                </div>
+                <img src="/imagotipo.png" className="w-20" />
               </div>
               <h1 className="text-4xl font-bold bg-linear-to-r from-[#F97316] to-[#8B5CF6] bg-clip-text text-transparent">InmiJobs</h1>
-              <p className="text-[#6B7280] mt-3 text-lg">Crea tu cuenta</p>
+              <p className="text-[#6B7280] mt-3 text-lg">Conectando talento con oportunidades</p>
             </div>
             {["name", "email", "password"].map((field) => (
               <div key={field}>
