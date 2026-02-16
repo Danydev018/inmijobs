@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 const inputClass = "w-full px-4 py-3.5 border-2 border-[#E5E7EB] rounded-xl text-[16px] bg-white text-[#1F2937] placeholder:text-[#9CA3AF] focus:border-[#F97316] focus:ring-4 focus:ring-[#F97316]/10 transition-all"
-const btnPrimaryClass = "w-full py-4 rounded-xl font-bold text-base cursor-pointer bg-gradient-to-r from-[#F97316] to-[#8B5CF6] text-white hover:from-[#EA580C] hover:to-[#7C3AED] shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+const btnPrimaryClass = "w-full py-4 rounded-xl font-bold text-base cursor-pointer bg-linear-to-r from-[#F97316] to-[#8B5CF6] text-white hover:from-[#EA580C] hover:to-[#7C3AED] shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
 
 const GeometricPattern = () => (
   <div className="absolute inset-0 -z-10 opacity-10 pointer-events-none overflow-hidden">
@@ -59,18 +59,18 @@ function RouteComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF3E6] to-[#F3E8FF] flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-linear-to-br from-[#FFF3E6] to-[#F3E8FF] flex items-center justify-center p-4 relative">
       <GeometricPattern />
       <WaveDecoration />
       <div className="w-full max-w-md relative">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#F97316] to-[#8B5CF6] rounded-2xl blur-xl opacity-30"></div>
-            <div className="w-20 h-20 bg-gradient-to-br from-[#F97316] to-[#8B5CF6] rounded-2xl shadow-xl flex items-center justify-center relative">
+            <div className="absolute inset-0 bg-linear-to-r from-[#F97316] to-[#8B5CF6] rounded-2xl blur-xl opacity-30"></div>
+            <div className="w-20 h-20 bg-linear-to-br from-[#F97316] to-[#8B5CF6] rounded-2xl shadow-xl flex items-center justify-center relative">
               <span className="text-white text-4xl font-bold">IJ</span>
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#F97316] to-[#8B5CF6] bg-clip-text text-transparent">InmiJobs</h1>
+          <h1 className="text-4xl font-bold bg-linear-to-r from-[#F97316] to-[#8B5CF6] bg-clip-text text-transparent">InmiJobs</h1>
           <p className="text-[#6B7280] mt-3 text-lg">Crea tu cuenta</p>
         </div>
         
@@ -99,7 +99,8 @@ function RouteComponent() {
           <div className="mt-6 text-center">
             <p className="text-[#6B7280]">
               ¿Ya tienes una cuenta?{" "}
-              <Link to="/signin" className="font-bold bg-gradient-to-r from-[#F97316] to-[#8B5CF6] bg-clip-text text-transparent hover:from-[#EA580C] hover:to-[#7C3AED]">Iniciar Sesión</Link>
+              {/* Corregido: bg-linear-to-r */}
+              <Link to="/signin" className="font-bold bg-linear-to-r from-[#F97316] to-[#8B5CF6] bg-clip-text text-transparent hover:from-[#EA580C] hover:to-[#7C3AED]">Iniciar Sesión</Link>
             </p>
           </div>
         </div>
