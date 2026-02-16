@@ -1,5 +1,13 @@
 package model
 
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+// --- ENUMS Y CONSTANTES ---
+
 type Rol string
 
 const (
@@ -8,90 +16,114 @@ const (
 	RolUser       Rol = "User"
 )
 
+// --- STRUCTS PRINCIPALES ---
+
 type Post struct {
-	ID           uint          `gorm:"primaryKey"`
-	JobID        *int          `gorm:"not null"`
-	Job          *Job          `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	UserID       int           `gorm:"not null"`
-	User         User          `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	CompanyID    int           `gorm:"not null"`
-	Company      *Company      `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Content      string        `gorm:"not null"`
-	Created_at   UnixTime      `gorm:"not null;autoCreateTime"`
-	Update_at    UnixTime      `gorm:"not null;autoCreateTime"`
-	Deleted_at   UnixTime      `gorm:"not null;autoCreateTime"`
-	Comments     []Comment     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Interactions []Interaction `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Images       []Image       `gorm:"many2many:PostImage;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID      uint   `gorm:"primaryKey" json:"id"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+
+	// Relaciones
+	UserID uint  `json:"user_id"`
+	User   *User `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
+
+	JobID *int `json:"job_id,omitempty"`
+	Job   *Job `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"job,omitempty"`
+
+	CompanyID *int     `json:"company_id,omitempty"`
+	Company   *Company `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"company,omitempty"`
+
+	// Listas (Has Many / Many to Many)
+	Comments     []Comment     `gorm:"foreignKey:PostID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"comments,omitempty"`
+	Interactions []Interaction `gorm:"foreignKey:PostID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"interactions,omitempty"`
+	Images       []Image       `gorm:"many2many:post_images;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"images,omitempty"`
+
+	// Tiempos
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type Job struct {
-	ID          uint    `gorm:"primaryKey"`
-	CompanyID   int     `gorm:"not null"`
-	Company     Company `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	RecruiterID int     `gorm:"not null"`
-	Recruiter   User    `gorm:"foreignKey:RecruiterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Title       string  `gorm:"not null"`
-	Description string  `gorm:"not null"`
-	Status      string  `gorm:"not null"`
-	Posts       []Post  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-}
+	ID          uint   `gorm:"primaryKey" json:"id"`
+	Title       string `gorm:"not null" json:"title"`
+	Description string `gorm:"not null" json:"description"`
+	Status      string `gorm:"not null" json:"status"`
 
-type Image struct {
-	ID         uint     `gorm:"primaryKey"`
-	Caption    string   `gorm:"not null"`
-	URL        string   `gorm:"not null"`
-	Created_at UnixTime `gorm:"not null;autoCreateTime"`
-}
+	CompanyID int      `gorm:"not null" json:"company_id"`
+	Company   *Company `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"company,omitempty"`
 
-type Comment struct {
-	ID         uint     `gorm:"primaryKey"`
-	UserID     int      `gorm:"not null"`
-	User       User     `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	PostID     int      `gorm:"not null"`
-	Post       Post     `gorm:"foreignKey:PostID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Content    string   `gorm:"type:text"`
-	Created_at UnixTime `gorm:"not null;autoCreateTime"`
-	Update_at  UnixTime `gorm:"autoUpdateTime"`
-	Deleted_at UnixTime `gorm:"not null;autoDeleteTime"`
+	RecruiterID int   `gorm:"not null" json:"recruiter_id"`
+	Recruiter   *User `gorm:"foreignKey:RecruiterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"recruiter,omitempty"`
+
+	Posts []Post `gorm:"foreignKey:JobID" json:"posts,omitempty"`
 }
 
 type Company struct {
-	ID       uint   `gorm:"primaryKey"`
-	OwnerID  uint   `gorm:"index"`
-	Owner    User   `gorm:"foreignKey:OwnerID"`
-	Name     string `gorm:"not null"`
-	Location string `gorm:"not null"`
-}
+	ID       uint   `gorm:"primaryKey" json:"id"`
+	Name     string `gorm:"not null" json:"name"`
+	Location string `gorm:"not null" json:"location"`
 
-type Reaction struct {
-	ID      uint   `gorm:"primaryKey"`
-	Name    string `gorm:"not null"`
-	IconURL string `gorm:"not null"`
-}
-
-type Interaction struct {
-	ID         uint     `gorm:"primaryKey"`
-	UserID     int      `gorm:"not null"`
-	User       User     `gorm:"foreignKey:UserID"`
-	PostID     int      `gorm:"not null"`
-	Post       Post     `gorm:"foreignKey:PostID"`
-	ReactionID int      `gorm:"not null;uniqueIndex"`
-	Reaction   Reaction `gorm:"foreignKey:ReactionID"`
-	Created_at UnixTime `gorm:"not null;autoCreateTime"`
+	OwnerID uint  `gorm:"index" json:"owner_id"`
+	Owner   *User `gorm:"foreignKey:OwnerID" json:"owner,omitempty"`
 }
 
 type Employee struct {
-	ID        uint    `gorm:"primaryKey"`
-	UserID    int     `gorm:"not null"`
-	User      User    `gorm:"foreignKey:UserID"`
-	CompanyID int     `gorm:"not null"`
-	Company   Company `gorm:"foreignKey:CompanyID"`
-	Rol       Rol     `gorm:"index;type:Rol;not null"`
+	ID     uint `gorm:"primaryKey" json:"id"`
+	UserID int  `gorm:"not null" json:"user_id"`
+	User   *User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+
+	CompanyID int      `gorm:"not null" json:"company_id"`
+	Company   *Company `gorm:"foreignKey:CompanyID" json:"company,omitempty"`
+
+	Rol Rol `gorm:"index;type:varchar(50);not null" json:"rol"`
 }
 
+type Comment struct {
+	ID      uint   `gorm:"primaryKey" json:"id"`
+	Content string `gorm:"type:text" json:"content"`
+
+	UserID uint  `gorm:"not null" json:"user_id"`
+	User   *User `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
+
+	PostID uint  `gorm:"not null" json:"post_id"`
+	Post   *Post `gorm:"foreignKey:PostID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
+
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type Interaction struct {
+	ID uint `gorm:"primaryKey" json:"id"`
+
+	UserID uint  `gorm:"not null" json:"user_id"`
+	User   *User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+
+	PostID uint  `gorm:"not null" json:"post_id"`
+	Post   *Post `gorm:"foreignKey:PostID" json:"-"`
+
+	ReactionID int       `gorm:"not null" json:"reaction_id"`
+	Reaction   *Reaction `gorm:"foreignKey:ReactionID" json:"reaction,omitempty"`
+
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Reaction struct {
+	ID      uint   `gorm:"primaryKey" json:"id"`
+	Name    string `gorm:"not null" json:"name"`
+	IconURL string `gorm:"not null" json:"icon_url"`
+}
+
+type Image struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Name      string    `gorm:"not null" json:"name"`
+	URL       string    `gorm:"not null" json:"url"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// Esta tabla intermedia es necesaria para la relación many2many de Post <-> Image
 type PostImage struct {
-	ID   int    `gorm:"primaryKey"`
-	Name string `gorm:"not null"`
-	URL  string `gorm:"not null"`
+	PostID  uint `gorm:"primaryKey"`
+	ImageID uint `gorm:"primaryKey"`
 }
