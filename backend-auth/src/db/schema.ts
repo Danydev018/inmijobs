@@ -86,7 +86,7 @@ export const profiles = sqliteTable("profiles", {
 });
 
 export const connections = sqliteTable("connections", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey(),
   requesterId: text("requester_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
