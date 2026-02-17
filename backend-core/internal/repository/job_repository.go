@@ -8,10 +8,10 @@ import (
 )
 
 type JobRepository struct {
-	db *gorm.DB
+	db gorm.DB
 }
 
-func NewJobRepository(db *gorm.DB) *JobRepository {
+func NewJobRepository(db gorm.DB) *JobRepository {
 	return &JobRepository{
 		db: db,
 	}

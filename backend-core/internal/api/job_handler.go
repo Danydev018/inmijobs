@@ -13,11 +13,11 @@ import (
 )
 
 type JobHandler struct {
-	jobService  *core.JobService
-	authService *core.AuthService
+	jobService  core.JobService
+	authService core.AuthService
 }
 
-func NewJobHandler(js *core.JobService, as *core.AuthService) *JobHandler {
+func NewJobHandler(js core.JobService, as core.AuthService) *JobHandler {
 	return &JobHandler{
 		jobService:  js,
 		authService: as,

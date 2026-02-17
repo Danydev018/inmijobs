@@ -26,15 +26,15 @@ func main() {
 
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
-	jobRepository := repository.NewJobRepository(db)
+	jobRepository := repository.NewJobRepository(*db)
 
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
-	jobService := core.NewJobService(jobRepository)
+	jobService := core.NewJobService(*jobRepository)
 
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
-	jobHandler := api.NewJobHandler(jobService, authService)
+	jobHandler := api.NewJobHandler(*jobService, *authService)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
@@ -43,23 +43,25 @@ func main() {
 	r.Use(httprate.LimitByIP(100, time.Minute))
 
 	r.Route("/api", func(r chi.Router) {
-		// Auth & Profile
 		r.Get("/ping", pingHandler.Ping)
-		r.Put("/profiles/me", profileHandler.UpdateProfile)
-		r.Get("/profiles/{id}", profileHandler.GetProfile)
 
-		// Jobs
-		r.Get("/jobs", jobHandler.GetJobs)
-		r.Route("/jobs/{id}", func(r chi.Router) {
-			r.Get("/", jobHandler.GetJobByID)
-			r.Put("/", jobHandler.UpdateJob)
-			r.Delete("/", jobHandler.DeleteJob)
-			r.Post("/applications", jobHandler.CreateApplication)
-			r.Get("/applications", jobHandler.GetJobApplications)
+		r.Route("/profiles", func(r chi.Router) {
+			r.Put("/me", profileHandler.UpdateProfile)
+			r.Get("/{id}", profileHandler.GetProfile)
 		})
 
-		// Company
-		r.Put("/company/{id}", jobHandler.UpdateCompany)
+		r.Route("/jobs", func(r chi.Router) {
+			r.Get("/", jobHandler.GetJobs)
+			r.Get("/{id}", jobHandler.GetJobByID)
+			r.Put("/{id}", jobHandler.UpdateJob)
+			r.Delete("/{id}", jobHandler.DeleteJob)
+			r.Post("/{id}/applications", jobHandler.CreateApplication)
+			r.Get("/{id}/applications", jobHandler.GetJobApplications)
+		})
+
+		r.Route("/companies", func(r chi.Router) {
+			r.Put("/{id}", jobHandler.UpdateCompany)
+		})
 	})
 
 	port := ":8080"

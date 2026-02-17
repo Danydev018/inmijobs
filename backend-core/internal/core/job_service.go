@@ -18,10 +18,10 @@ var (
 )
 
 type JobService struct {
-	jobRepository *repository.JobRepository
+	jobRepository repository.JobRepository
 }
 
-func NewJobService(jr *repository.JobRepository) *JobService {
+func NewJobService(jr repository.JobRepository) *JobService {
 	return &JobService{
 		jobRepository: jr,
 	}
