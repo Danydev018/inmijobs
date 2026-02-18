@@ -17,6 +17,7 @@ type PostService interface {
 	UpdatePost(ctx context.Context, postID uint, input model.Post) (model.Post, error)
 	CreatePost(ctx context.Context, req dto.CreatePostRequest) (model.Post, error)
 	GetByID(ctx context.Context, id uint) (*model.Post, error)
+	DeletePost(ctx context.Context, id uint) (*model.Post, error)
 }
 
 type postService struct {
@@ -75,5 +76,20 @@ func (s *postService) GetByID(ctx context.Context, id uint) (*model.Post, error)
 		return nil, err
 	}
 
+	return post, nil
+}
+
+func (s *postService) DeletePost(ctx context.Context, id uint) (*model.Post, error) {
+
+	if s.repo.IsAlreadyDeleted(ctx, id) {
+		slog.Error("The post is already Deleted")
+		return nil, errors.New("The post is already deleted")
+	}
+	post, err := s.repo.DeletePost(ctx, id)
+
+	if err != nil {
+		slog.Error("[PostService][CreatePost] Unable to delete post", "error", err)
+		return nil, err
+	}
 	return post, nil
 }
