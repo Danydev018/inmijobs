@@ -1,13 +1,17 @@
+import { useState } from 'react';
+import { Image as ImageIcon, MessageCircle, MoreHorizontal, Share2, Smile, ThumbsUp, Video} from "lucide-react";
+import type { Post, User } from "../types";
 import { Button } from "@/components/ui/button";
-import type { User, Post } from "../types";
-import { Image as ImageIcon, Video, Smile, MoreHorizontal, MessageCircle, Share2, ThumbsUp } from "lucide-react";
 
 interface ProfileFeedProps {
     user: User;
     posts: Post[];
 }
 
+
+
 export function ProfileFeed({ user, posts }: ProfileFeedProps) {
+    const [postContent, setPostContent] = useState("");
     return (
         <div className="flex-1">
             {/* Create Post - Simplified */}
@@ -17,9 +21,13 @@ export function ProfileFeed({ user, posts }: ProfileFeedProps) {
                         <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
-                        <div className="bg-muted/50 rounded-lg p-3 text-muted-foreground text-sm cursor-text hover:bg-muted transition-colors mb-2">
-                            Comparte una actualización, artículo o proyecto...
-                        </div>
+                        {/* ÁREA DE TEXTO (TEXTAREA) */}
+                        <textarea
+                            value={postContent}
+                            onChange={(e) => setPostContent(e.target.value)}
+                            placeholder="Comparte una actualización, artículo o proyecto..."
+                            className="w-full bg-muted/50 rounded-lg p-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 resize-none min-h-[80px] mb-2 transition-all"
+                        />
                         <div className="flex justify-between items-center">
                             <div className="flex gap-1">
                                 <Button variant="ghost" size="sm" className="text-muted-foreground gap-2">
@@ -31,7 +39,12 @@ export function ProfileFeed({ user, posts }: ProfileFeedProps) {
                                     <span className="hidden sm:inline text-xs">Video</span>
                                 </Button>
                             </div>
-                            <Button size="sm" className="bg-primary text-primary-foreground">
+                            {/* Botón Publicar (Deshabilitado si está vacío) */}
+                            <Button 
+                                size="sm" 
+                                className="bg-primary text-primary-foreground"
+                                disabled={!postContent.trim()} 
+                            >
                                 Publicar
                             </Button>
                         </div>
