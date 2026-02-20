@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/model"
 	"gorm.io/gorm"
@@ -14,6 +16,7 @@ type PostRepo interface {
 	GetByID(ctx context.Context, id uint) (*model.Post, error)
 	DeletePost(ctx context.Context, id uint) (*model.Post, error)
 	IsAlreadyDeleted(ctx context.Context, id uint) bool
+	GetJobByID(ctx context.Context, id int) (*model.Job, error)
 }
 
 type postRepository struct {
@@ -28,17 +31,16 @@ func (r *postRepository) GetByID(ctx context.Context, id uint) (*model.Post, err
 	var post model.Post
 
 	err := r.db.WithContext(ctx).
-		Joins("User").
-		Joins("Company").
-		Joins("Job").
-		Preload("Images").
-		Preload("Interactions").
-		Preload("Comments", func(db *gorm.DB) *gorm.DB {
-
-			return db.Select("id", "post_id", "content", "created_at")
-		}).
-		First(&post, id).Error
-	return &post, err
+        Joins("User").
+        Joins("Company").
+        Joins("Job").
+        Preload("Images").
+        Preload("Interactions.User").
+        Preload("Interactions.Reaction").
+        Preload("Comments.User"). 
+        First(&post, id).Error
+        
+    return &post, err
 }
 
 func (r *postRepository) EditPost(ctx context.Context, postID uint, p model.Post) (model.Post, error) {
@@ -105,4 +107,21 @@ func (r *postRepository) IsAlreadyDeleted(ctx context.Context, id uint) bool {
 		return true
 	}
 	return false
+}
+
+func (r *postRepository) GetJobByID(ctx context.Context, id int) (*model.Job, error) {
+	var job model.Job
+
+	err := r.db.WithContext(ctx).
+		Preload("Company").
+		First(&job, id).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("job not found with id %d", id)
+		}
+		return nil, err
+	}
+
+	return &job, nil
 }

@@ -1,5 +1,10 @@
 package model
 
+/* 
+Esto es una modelo PRUEBA para ver si se puede relacionar con atributos post
+no nos hacemos responsable del modelo original ni este
+*/
+
 type Rol string
 
 const (
