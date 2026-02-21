@@ -23,14 +23,25 @@ type CreateCompanyRequest struct {
 type CompanyResponse struct {
 	ID          string             `json:"id"`
 	Name        string             `json:"name"`
+	Weblink     string             `json:"weblink"`
 	LinkedinURL string             `json:"linkedin_url"`
+	Number      string             `json:"number"`
+	Description string             `json:"description"`
 	Sector      string             `json:"sector"`
+	Foundation  string             `json:"foundation"`
+	Size        string             `json:"size"`
 	Logo        *string            `json:"logo"`
+	Banner      *string            `json:"banner"`
+	CreatedAt   int64              `json:"created_at"`
+	UpdatedAt   int64              `json:"updated_at"`
+	UserID      string             `json:"user_id"`
 	Locations   []LocationResponse `json:"locations,omitempty"`
 }
 
 type LocationResponse struct {
+	ID      string `json:"id"`
 	Address string `json:"address"`
 	City    string `json:"city"`
+	Country string `json:"country"`
 	IsHQ    bool   `json:"is_hq"`
 }
