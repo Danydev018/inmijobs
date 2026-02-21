@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -29,14 +28,20 @@ func main() {
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
 	jobRepository := repository.NewJobRepository(*db)
+	connRepository := repository.NewConnectionRepository(*db)
+	companyRepository := repository.NewCompanyRepository(*db)
 
+	companyService := core.NewCompanyService(*companyRepository)
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
 	jobService := core.NewJobService(*jobRepository)
 
+	companyHandler := api.NewCompanyHandler(*companyService, *authService)
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
 	jobHandler := api.NewJobHandler(*jobService, *authService)
+	connHandler := api.NewConnectionHandler(connRepository, *authService)
+	
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
@@ -62,13 +67,23 @@ func main() {
 		})
 
 		r.Route("/companies", func(r chi.Router) {
+			r.Post("/", companyHandler.Create)
+			r.Get("/{id}", companyHandler.GetByID)
 			r.Put("/{id}", jobHandler.UpdateCompany)
 		})
-	})
 
+    r.Route("/connections", func(r chi.Router) {
+        	r.Get("/test", connHandler.Ping)         
+        	r.Post("/", connHandler.CreateConnection)      
+        	r.Put("/{id}", connHandler.UpdateConnection)   
+        	r.Delete("/{id}", connHandler.DeleteConnection)
+
+    })
+	})
+	
 	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
 	log.Printf("Server starting on port %s", port)
-	if err := http.ListenAndServe(port, r); err != nil {
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }

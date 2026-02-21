@@ -13,7 +13,7 @@ import { Route as PingRouteImport } from './routes/ping'
 import { Route as privateRouteRouteImport } from './routes/(private)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as privateIndexRouteImport } from './routes/(private)/index'
-import { Route as privatePostCardPreviewRouteImport } from './routes/(private)/post-card-preview'
+import { Route as privateProfileRouteImport } from './routes/(private)/profile'
 import { Route as privateJobsRouteImport } from './routes/(private)/jobs'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authSigninRouteImport } from './routes/(auth)/signin'
@@ -36,11 +36,9 @@ const privateIndexRoute = privateIndexRouteImport.update({
   path: '/',
   getParentRoute: () => privateRouteRoute,
 } as any)
-const privatePostCardPreviewRoute = privatePostCardPreviewRouteImport.update({
-  id: '/post-card-preview',
-  path: '/post-card-preview',
-  getParentRoute: () => privateRouteRoute,
-} as any)
+const privateProfileRoute = privateProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
 const privateJobsRoute = privateJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -61,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/ping': typeof PingRoute
   '/signin': typeof authSigninRoute
   '/signup': typeof authSignupRoute
+  '/profile': typeof privateProfileRoute
   '/jobs': typeof privateJobsRoute
   '/post-card-preview': typeof privatePostCardPreviewRoute
   '/': typeof privateIndexRoute
@@ -69,6 +68,7 @@ export interface FileRoutesByTo {
   '/ping': typeof PingRoute
   '/signin': typeof authSigninRoute
   '/signup': typeof authSignupRoute
+  '/profile': typeof privateProfileRoute
   '/jobs': typeof privateJobsRoute
   '/post-card-preview': typeof privatePostCardPreviewRoute
   '/': typeof privateIndexRoute
@@ -80,19 +80,17 @@ export interface FileRoutesById {
   '/ping': typeof PingRoute
   '/(auth)/signin': typeof authSigninRoute
   '/(auth)/signup': typeof authSignupRoute
+  '/(private)/profile': typeof privateProfileRoute
   '/(private)/jobs': typeof privateJobsRoute
   '/(private)/post-card-preview': typeof privatePostCardPreviewRoute
   '/(private)/': typeof privateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/ping'
-    | '/signin'
-    | '/signup'
-    | '/jobs'
-    | '/post-card-preview'
-    | '/'
+  fullPaths: '/ping' | '/signin' | '/signup' | '/profile' | '/'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/ping' | '/signin' | '/signup' | '/profile' | '/'
+  fullPaths: '/ping' | '/signin' | '/signup' | '/jobs' | '/'
   fileRoutesByTo: FileRoutesByTo
   to: '/ping' | '/signin' | '/signup' | '/jobs' | '/post-card-preview' | '/'
   id:
@@ -102,6 +100,7 @@ export interface FileRouteTypes {
     | '/ping'
     | '/(auth)/signin'
     | '/(auth)/signup'
+    | '/(private)/profile'
     | '/(private)/jobs'
     | '/(private)/post-card-preview'
     | '/(private)/'
@@ -143,13 +142,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privateIndexRouteImport
       parentRoute: typeof privateRouteRoute
     }
-    '/(private)/post-card-preview': {
-      id: '/(private)/post-card-preview'
-      path: '/post-card-preview'
-      fullPath: '/post-card-preview'
-      preLoaderRoute: typeof privatePostCardPreviewRouteImport
-      parentRoute: typeof privateRouteRoute
-    }
+    '/(private)/profile': {
+      id: '/(private)/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof privateProfileRouteImport
     '/(private)/jobs': {
       id: '/(private)/jobs'
       path: '/jobs'
@@ -189,12 +186,14 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface privateRouteRouteChildren {
+  privateProfileRoute: typeof privateProfileRoute
   privateJobsRoute: typeof privateJobsRoute
   privatePostCardPreviewRoute: typeof privatePostCardPreviewRoute
   privateIndexRoute: typeof privateIndexRoute
 }
 
 const privateRouteRouteChildren: privateRouteRouteChildren = {
+  privateProfileRoute: privateProfileRoute,
   privateJobsRoute: privateJobsRoute,
   privatePostCardPreviewRoute: privatePostCardPreviewRoute,
   privateIndexRoute: privateIndexRoute,
