@@ -7,15 +7,19 @@ import (
 )
 
 type Post struct {
-	ID           uint   `gorm:"primaryKey;autoIncrement"`
-	Title        string `gorm:"type:text;not null"`
-	Content      string `gorm:"type:text;not null"`
-	UserID       string `gorm:"not null"`
-	User         User   `gorm:"foreignKey:UserID"`
-	JobID        *int
-	Job          Job `gorm:"foreignKey:JobID"`
-	CompanyID    *int
-	Company      Company        `gorm:"foreignKey:CompanyID"`
+	ID             string `gorm:"primaryKey"`
+	Title   string `gorm:"type:text;not null"`
+	Content string `gorm:"type:text;not null"`
+
+	UserID string `gorm:"index"`
+	User   User   `gorm:"foreignKey:UserID"`
+
+	JobID *string `gorm:"index"`
+	Job   *Job    `gorm:"foreignKey:JobID"`
+
+	CompanyID *string  `gorm:"index"`
+	Company   *Company `gorm:"foreignKey:CompanyID"`
+
 	Comments     []Comment      `gorm:"foreignKey:PostID"`
 	Interactions []Interaction  `gorm:"foreignKey:PostID"`
 	Images       []Image        `gorm:"many2many:post_images;"`

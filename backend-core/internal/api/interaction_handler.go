@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/core"
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/dto"
@@ -21,11 +20,9 @@ func NewInteractionHandler(service core.InteractionRepo) *InteractionHandler {
 
 func (h *InteractionHandler) TogglePostReaction(w http.ResponseWriter, r *http.Request) {
 
-	postIDStr := chi.URLParam(r, "id")
-	postID, err := strconv.ParseUint(postIDStr, 10, 32)
-
-	if err != nil {
-		utils.RespondError(w, http.StatusBadRequest, "ERROR: ID invalid")
+	Postid := chi.URLParam(r, "id")
+	if Postid == "" {
+		utils.RespondError(w, http.StatusBadRequest, "Missing post ID")
 		return
 	}
 
@@ -36,7 +33,7 @@ func (h *InteractionHandler) TogglePostReaction(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	interaction, action, err := h.service.TogglePostReaction(req.UserID, uint(postID), req.ReactionID)
+	interaction, action, err := h.service.TogglePostReaction(req.UserID, Postid, req.ReactionID)
 
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "ERROR: Loading reaction's info")
@@ -61,15 +58,13 @@ func (h *InteractionHandler) TogglePostReaction(w http.ResponseWriter, r *http.R
 
 func (h *InteractionHandler) GetPostReactions(w http.ResponseWriter, r *http.Request) {
 
-	postIDStr := chi.URLParam(r, "id")
-	postID, err := strconv.ParseUint(postIDStr, 10, 32)
-
-	if err != nil {
-		utils.RespondError(w, http.StatusBadRequest, "ERROR: ID invalid")
+	Postid := chi.URLParam(r, "id")
+	if Postid == "" {
+		utils.RespondError(w, http.StatusBadRequest, "Missing post ID")
 		return
 	}
 
-	interactions, err := h.service.GetReactionsByPost(uint(postID))
+	interactions, err := h.service.GetReactionsByPost(Postid)
 
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "ERROR: error listing reactions")

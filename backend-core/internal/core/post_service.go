@@ -16,38 +16,44 @@ import (
 )
 
 type PostService interface {
-	UpdatePost(ctx context.Context, postID uint, input model.Post) (model.Post, error)
+	UpdatePost(ctx context.Context, postID string, req dto.CreatePostRequest) (model.Post, error)
 	CreatePost(ctx context.Context, req dto.CreatePostRequest) (*model.Post, error)
-	GetByID(ctx context.Context, id uint) (*dto.PostResponseDTO, error)
-	DeletePost(ctx context.Context, id uint) (*model.Post, error)
+	GetByID(ctx context.Context, id string) (*dto.PostResponseDTO, error)
+	DeletePost(ctx context.Context, id string) (*model.Post, error)
 }
 
 type postService struct {
-	repo repository.PostRepo
+	repo    repository.PostRepo
+	jobRepo repository.JobRepository
 }
 
-func NewPostService(repo repository.PostRepo) PostService {
+func NewPostService(repo repository.PostRepo, jobRepo repository.JobRepository) PostService {
 	return &postService{
-		repo: repo,
+		repo:    repo,
+		jobRepo: jobRepo,
 	}
 }
 
 func (s *postService) CreatePost(ctx context.Context, req dto.CreatePostRequest) (*model.Post, error) {
 
-	if req.JobID != nil && *req.JobID == 0 {
+	if req.Title == "" || req.Content == "" {
+		return nil, errors.New("Write a title!")
+	}
+
+	if req.JobID != nil && req.JobID == nil {
 		return nil, errors.New("invalid job id")
 	}
 
 	var postImages []model.Image
-    for _, url := range req.Images {
-        if url != "" {
-            postImages = append(postImages, model.Image{
-                URL: url,
-            })
-        }
-    }
+	for _, url := range req.Images {
+		if url != "" {
+			postImages = append(postImages, model.Image{
+				URL: url,
+			})
+		}
+	}
 	post := model.Post{
-
+		ID:        utils.NewID(),
 		Title:     req.Title,
 		UserID:    req.UserID,
 		JobID:     req.JobID,
@@ -56,19 +62,22 @@ func (s *postService) CreatePost(ctx context.Context, req dto.CreatePostRequest)
 		Images:    postImages,
 	}
 	if post.JobID != nil {
-		job, err := s.repo.GetJobByID(ctx, *post.JobID)
+		job, err := s.jobRepo.GetJobByID(ctx, *post.JobID)
 		if err != nil {
-			slog.Error("[PostService] Job no encontrado", "jobID", *post.JobID, "error", err)
-			return nil, fmt.Errorf("la vacante con ID %d no existe", *post.JobID)
+			slog.Error("[PostService] Job no encontrado", "jobID", post.JobID, "error", err)
+			return nil, fmt.Errorf("la vacante con ID %d no existe", post.JobID)
 		}
 
-		if job.Status != string(model.On) {
-			return nil, fmt.Errorf("no se puede publicar: la vacante está %s", job.Status)
-		}
-		if post.CompanyID != nil && *post.CompanyID != job.CompanyID {
-			return nil, fmt.Errorf("la empresa del post no coincide con la empresa de la vacante")
-		}
+		post.JobID = &job.ID
 		post.CompanyID = &job.CompanyID
+
+		if job.IsActive != true {
+			return nil, fmt.Errorf("no se puede publicar: la vacante está %s", job.Status)
+		} else if req.CompanyID != nil {
+
+			post.CompanyID = req.CompanyID
+		}
+
 	}
 	err := s.repo.CreatePost(ctx, &post)
 
@@ -79,20 +88,34 @@ func (s *postService) CreatePost(ctx context.Context, req dto.CreatePostRequest)
 	return &post, nil
 }
 
-func (s *postService) UpdatePost(ctx context.Context, postID uint, p model.Post) (model.Post, error) {
+func (s *postService) UpdatePost(ctx context.Context, postID string, req dto.CreatePostRequest) (model.Post, error) {
 
 	existingPost, err := s.repo.GetByID(ctx, postID)
 	if err != nil {
 		return model.Post{}, errors.New("post no encontrado")
 	}
 
-	p.UserID = existingPost.UserID
-	p.CreatedAt = existingPost.CreatedAt
+	p := model.Post{
+		ID:        postID,
+		Title:     req.Title,
+		Content:   req.Content,
+		UserID:    existingPost.UserID,
+		JobID:     req.JobID,
+		CompanyID: req.CompanyID,
+		CreatedAt: existingPost.CreatedAt,
+	}
+
+	if len(req.Images) > 0 {
+		for _, url := range req.Images {
+			p.Images = append(p.Images, model.Image{
+				URL: url,
+			})
+		}
+	}
 
 	return s.repo.EditPost(ctx, postID, p)
 }
-
-func (s *postService) GetByID(ctx context.Context, id uint) (*dto.PostResponseDTO, error) {
+func (s *postService) GetByID(ctx context.Context, id string) (*dto.PostResponseDTO, error) {
 
 	post, err := s.repo.GetByID(ctx, id)
 
@@ -107,7 +130,7 @@ func (s *postService) GetByID(ctx context.Context, id uint) (*dto.PostResponseDT
 	return response, nil
 }
 
-func (s *postService) DeletePost(ctx context.Context, id uint) (*model.Post, error) {
+func (s *postService) DeletePost(ctx context.Context, id string) (*model.Post, error) {
 
 	if s.repo.IsAlreadyDeleted(ctx, id) {
 		slog.Error("The post is already Deleted")

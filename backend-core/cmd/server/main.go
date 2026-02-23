@@ -20,26 +20,33 @@ func main() {
 	godotenv.Load()
 
 	db, err := database.NewDatabase()
-
 	if err != nil {
 		log.Fatalf("Fatal Error connecting to database: %v", err)
 	}
 
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
+	jobRepository := repository.NewJobRepository(*db)
+	connRepository := repository.NewConnectionRepository(*db)
+	companyRepository := repository.NewCompanyRepository(*db)
 
+	companyService := core.NewCompanyService(*companyRepository)
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
+	jobService := core.NewJobService(*jobRepository)
 
+	companyHandler := api.NewCompanyHandler(*companyService, *authService)
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
+	jobHandler := api.NewJobHandler(*jobService, *authService)
+	connHandler := api.NewConnectionHandler(connRepository, *authService)
 
 	commentRepository := repository.NewCommentRepository(db)
 	commentService := core.NewCommentService(commentRepository)
 	commentHandler := api.NewCommentHandler(commentService, *authService)
 
 	postRepository := repository.NewPostRepository(db)
-	postService := core.NewPostService(postRepository)
+	postService := core.NewPostService(postRepository,*jobRepository)
 	postHandler := api.NewPostHandler(postService, *authService)
 
 	interactionRepository := repository.NewInteractionRepository(db)
@@ -72,8 +79,34 @@ func main() {
 			r.Put("/{id}", commentHandler.Update)
 		})
 
+		r.Route("/profiles", func(r chi.Router) {
+			r.Put("/me", profileHandler.UpdateProfile)
+			r.Get("/{id}", profileHandler.GetProfile)
+		})
+
+		r.Route("/jobs", func(r chi.Router) {
+			r.Get("/", jobHandler.GetJobs)
+			r.Get("/{id}", jobHandler.GetJobByID)
+			r.Put("/{id}", jobHandler.UpdateJob)
+			r.Delete("/{id}", jobHandler.DeleteJob)
+			r.Post("/{id}/applications", jobHandler.CreateApplication)
+			r.Get("/{id}/applications", jobHandler.GetJobApplications)
+		})
+
+		r.Route("/companies", func(r chi.Router) {
+			r.Post("/", companyHandler.Create)
+			r.Get("/{id}", companyHandler.GetByID)
+			r.Put("/{id}", jobHandler.UpdateCompany)
+		})
+
+		r.Route("/connections", func(r chi.Router) {
+			r.Post("/", connHandler.CreateConnection)
+			r.Put("/{id}", connHandler.UpdateConnection)
+			r.Delete("/{id}", connHandler.DeleteConnection)
+		})
 	})
 
+	//port := fmt.Sprintf(":%s", os.Getenv("PORT"))
 	port := ":8080"
 	log.Printf("Server starting on port %s", port)
 	if err := http.ListenAndServe(port, r); err != nil {

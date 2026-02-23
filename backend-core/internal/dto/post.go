@@ -5,41 +5,41 @@ import (
 )
 
 type CreatePostRequest struct {
-	ID        uint   `json:"id"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	UserID    string `json:"user_id"`
-	JobID     *int   `json:"job_id,omitempty"`
-	CompanyID *int   `json:"company_id,omitempty"`
+	ID        string   `json:"id"`
+	Title     string   `json:"title"`
+	Content   string   `json:"content"`
+	UserID    string   `json:"user_id"`
+	JobID     *string  `json:"job_id,omitempty"`
+	CompanyID *string  `json:"company_id,omitempty"`
 	Images    []string `json:"images"`
 }
 
 type PostResponseDTO struct {
-	ID           uint                  `json:"id"`
+	ID           string                `json:"id"`
 	Title        string                `json:"title"`
 	Content      string                `json:"content"`
 	CreatedAt    time.Time             `json:"created_at"`
 	User         UserShortDTO          `json:"user"`
 	Job          *JobShortDTO          `json:"job,omitempty"`
 	Company      *CompanyShortDTO      `json:"company,omitempty"`
-	Images       []string              `json:"images"` // Solo las URLs
+	Images       []string              `json:"images"` // URLS
 	Interactions []InteractionShortDTO `json:"interactions"`
 	Comments     []CommentShortDTO     `json:"comments"`
 }
 
-//Todos estos son DTO para mapear y poder mostrar de mejor manera los post en json 
+// Todos estos son DTO para mapear y poder mostrar de mejor manera los post en json
 type UserShortDTO struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type JobShortDTO struct {
-	ID    int    `json:"id"`
+	ID    string `json:"id"`
 	Title string `json:"title"`
 }
 
 type CompanyShortDTO struct {
-	ID       int    `json:"id"`
+	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Location string `json:"location"`
 }

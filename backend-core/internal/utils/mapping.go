@@ -48,7 +48,7 @@ func MapToCleanPost(post *model.Post) *dto.PostResponseDTO {
 	}
 
 	
-	if post.JobID != nil && post.Job.ID != 0 {
+	if post.JobID != nil && &post.Job.ID != nil {
 		response.Job = &dto.JobShortDTO{
 			ID:    post.Job.ID,
 			Title: post.Job.Title,
@@ -56,7 +56,7 @@ func MapToCleanPost(post *model.Post) *dto.PostResponseDTO {
 	}
 
 
-	if post.CompanyID != nil && post.Company.ID != 0 {
+	if post.CompanyID != nil && &post.Company.ID != nil {
 		response.Company = &dto.CompanyShortDTO{
 			ID:       post.Company.ID,
 			Name:     post.Company.Name,

@@ -1,31 +1,35 @@
 package model
 
-/* 
-Esto es una modelo PRUEBA para ver si se puede relacionar con atributos post
-no nos hacemos responsable del modelo original ni este
-*/
-
-type Rol string
-
-const (
-	RolAdmin      Rol = "Admin"
-	RolEmployment Rol = "Employment"
-	RolUser       Rol = "User"
-)
-
 type Company struct {
-	ID       int    `gorm:"primaryKey"`
-	Name     string `gorm:"not null"`
+	ID          string `gorm:"primaryKey"`
+	Name        string `gorm:"not null;index"`
+	Weblink     string `gorm:"not null"`
+	LinkedinURL string `gorm:"uniqueIndex;not null"`
+	Number      string `gorm:"size:20"`
+	Description string `gorm:"type:text;not null"`
+	Sector      string `gorm:"not null;index"`
+	Foundation  string `gorm:"size:4"`
+	Size        string `gorm:"not null"`
+	Logo        *string
+	Banner      *string
+	CreatedAt   int64  `gorm:"not null;autoCreateTime"`
+	UpdatedAt   int64  `gorm:"not null;autoUpdateTime"`
+	UserID      string `gorm:"not null;index"`
+	Owner       User   `gorm:"foreignKey:UserID;references:ID"`
+
+	Locations []Location `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Posts     []Post     `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Jobs      []Job      `gorm:"foreignKey:CompanyID"`
+
 	Location string `gorm:"not null"`
 	OwnerID  string `gorm:"index"`
-	Owner    User   `gorm:"foreignKey:OwnerID"`
 }
 
-type Employee struct {
-	ID        int     `gorm:"primaryKey"`
-	UserID    string  `gorm:"not null" `
-	User      User    `gorm:"foreignKey:UserID"`
-	CompanyID int     `gorm:"not null"`
-	Company   Company `gorm:"foreignKey:CompanyID"`
-	Rol       Rol     `gorm:"index;type:rol;not null"`
+type Location struct {
+	ID        string `gorm:"primaryKey"`
+	Address   string `gorm:"not null"`
+	City      string `gorm:"not null"`
+	Country   string `gorm:"not null"`
+	IsHQ      bool   `gorm:"default:false"`
+	CompanyID string `gorm:"not null;index"`
 }

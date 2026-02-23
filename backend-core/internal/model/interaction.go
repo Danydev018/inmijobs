@@ -6,7 +6,7 @@ type Interaction struct {
 	ID         int       `gorm:"primaryKey"`
 	UserID     string    `gorm:"not null"`
 	User       User      `gorm:"foreignKey:UserID"`
-	PostID     *uint     
+	PostID     string    
 	Post       Post      `gorm:"foreignKey:PostID"`
 	CommentID  *int      
 	ReactionID int       `gorm:"not null"`
