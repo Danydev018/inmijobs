@@ -34,41 +34,42 @@ function RouteComponent() {
       }}
       />
 
-      <div className="max-w-7xl flex w-full flex-1 mx-auto rounded-lg border border-[#E5E7EB] bg-white overflow-hidden">        {data?.data.jobs.length ? (<>
-        <div className="h-[calc(100%-64px)]">
-          <ScrollArea className="h-full border-r border-[#E5E7EB]">
-            <div className="flex flex-col gap-px bg-[#E5E7EB]">
-              {data.data.jobs.map(job => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onSelect={setSelectedId}
-                  selected={job.id === selectedId}
-                />
-              ))}
+      <div className="max-w-7xl flex w-full flex-1 mx-auto rounded-lg border border-[#E5E7EB] bg-white overflow-hidden">
+        {data?.data.jobs.length ? (<>
+          <div className="h-[calc(100%-64px)]">
+            <ScrollArea className="h-full border-r border-[#E5E7EB]">
+              <div className="flex flex-col gap-px bg-[#E5E7EB]">
+                {data.data.jobs.map(job => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onSelect={setSelectedId}
+                    selected={job.id === selectedId}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="h-16 border-t border-[#E5E7EB] flex items-center p-2 gap-2">
+              <Button className="flex-1 cursor-pointer" variant="secondary" disabled={page === 1} onClick={() => setPage(prev => Math.max(prev - 1, 1))}>
+                Anterior
+              </Button>
+              <div className="flex-2 text-center text-sm text-gray-500">
+                Página {page} de {data.data.totalPages}
+              </div>
+              <Button className="flex-1 cursor-pointer" variant="secondary" disabled={page === data.data.totalPages} onClick={() => setPage(prev => Math.min(prev + 1, data.data.totalPages))}>
+                Siguiente
+              </Button>
             </div>
-          </ScrollArea>
-          <div className="h-16 border-t border-[#E5E7EB] flex items-center p-2 gap-2">
-            <Button className="flex-1 cursor-pointer" variant="secondary" disabled={page === 1} onClick={() => setPage(prev => Math.max(prev - 1, 1))}>
-              Anterior
-            </Button>
-            <div className="flex-2 text-center text-sm text-gray-500">
-              Página {page} de {data.data.totalPages}
-            </div>
-            <Button className="flex-1 cursor-pointer" variant="secondary" disabled={page === data.data.totalPages} onClick={() => setPage(prev => Math.min(prev + 1, data.data.totalPages))}>
-              Siguiente
-            </Button>
           </div>
-        </div>
-        <JobDetailView job={activeJob} />
-      </>
-      ) :
-        <div className="flex-1 bg-white flex items-center justify-center">
-          <p className="text-gray-500">
-            {isLoading ? 'Loading...' : isError ? 'Error loading jobs' : 'No jobs found'}
-          </p>
-        </div>
-      }
+          <JobDetailView job={activeJob} />
+        </>
+        ) :
+          <div className="flex-1 bg-white flex items-center justify-center">
+            <p className="text-gray-500">
+              {isLoading ? 'Loading...' : isError ? 'Error loading jobs' : 'No jobs found'}
+            </p>
+          </div>
+        }
       </div>
     </div>)
 }

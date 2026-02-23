@@ -1,18 +1,18 @@
-import { ProfileSidebar, ProfileFeed } from '@/features/profile';
-import type { User, Post, Friend, Photo } from '@/features/profile';
+import type { Friend, Photo, Post, User } from '@/features/profile';
+import { ProfileFeed, ProfileSidebar } from '@/features/profile';
 
 interface ProfileTabTodoProps {
-    user: User;
-    friends: Friend[];
-    photos: Photo[];
-    posts: Post[];
+  user: User;
+  friends: Array<Friend>;
+  photos: Array<Photo>;
+  posts: Array<Post>;
 }
 
 export function ProfileTabTodo({ user, friends, photos, posts }: ProfileTabTodoProps) {
-    return (
-        <div className="flex flex-col lg:flex-row gap-4 items-start mt-4">
-            <ProfileSidebar user={user} friends={friends} photos={photos} />
-            <ProfileFeed user={user} posts={posts} />
-        </div>
-    );
+  return (
+    <div className="flex flex-col lg:flex-row gap-4 items-start mt-4">
+      <ProfileSidebar user={user} friends={friends} photos={photos} />
+      <ProfileFeed user={user} posts={posts} />
+    </div>
+  );
 }

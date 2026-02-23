@@ -24,7 +24,7 @@ export const Aside1 = () => {
 
   return (
     <aside className="w-full flex flex-col gap-4 p-4 sticky top-0 h-full border-r border-[#E5E7EB] bg-white/80 backdrop-blur-md">
-      <div className="flex flex-col items-center mb-6">
+      <Link to="/profile" className="flex flex-col items-center py-6 hover:bg-gray-100 cursor-pointer rounded-lg">
         <div className="relative w-35 mb-4">
           <div className="absolute">
             <div className="rounded-full w-20 h-20 bg-linear-to-tr from-purple-400/50 to-blue-400/50" />
@@ -46,7 +46,7 @@ export const Aside1 = () => {
         </div>
         <h2 className="font-bold mt-2 text-gray-800">{user?.name}</h2>
         <p className="text-sm text-gray-400">@{user?.name}</p>
-      </div>
+      </Link>
 
       <nav className="flex flex-col gap-1">
         {menuItems.map((item) => (
