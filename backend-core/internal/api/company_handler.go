@@ -83,7 +83,6 @@ func (h *CompanyHandler) CompanyFinder(w http.ResponseWriter, r *http.Request) {
 	companyDtos := make([]dto.CompanyResponse, len(companies))
 	for i, company := range companies {
 
-		// 🔥 Convertir Locations
 		locationDtos := make([]dto.LocationResponse, len(company.Locations))
 		for j, loc := range company.Locations {
 			locationDtos[j] = dto.LocationResponse{
