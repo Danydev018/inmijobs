@@ -88,7 +88,6 @@ func (s *CompanyService) GetCompany(id string) (*dto.CompanyResponse, error) {
 	return res, nil
 }
 
-// CompanyFinder returns jobs filtered by company criteria (delegates to repository)
 func (s *CompanyService) CompanyFinder(ctx context.Context, filter dto.CompanyFilterDto) ([]model.Company, int64, error) {
 	return s.repo.CompanyFinder(ctx, filter)
 }
