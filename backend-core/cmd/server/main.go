@@ -101,6 +101,7 @@ func main() {
 		})
 
 		r.Route("/connections", func(r chi.Router) {
+			r.Get("/", connHandler.GetConnections)
 			r.Post("/", connHandler.CreateConnection)
 			r.Put("/{id}", connHandler.UpdateConnection)
 			r.Delete("/{id}", connHandler.DeleteConnection)
