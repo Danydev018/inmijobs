@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/api"
@@ -44,12 +42,13 @@ func main() {
 	connHandler := api.NewConnectionHandler(connRepository, *authService)
 
 	commentRepository := repository.NewCommentRepository(db)
-	commentService := core.NewCommentService(*commentRepository)
-	commentHandler := api.NewCommentHandler(*commentService, *authService)
+	commentService := core.NewCommentService(commentRepository)
+	commentHandler := api.NewCommentHandler(commentService, *authService)
 
 	postRepository := repository.NewPostRepository(db)
-	postService := core.NewPostService(postRepository)
-	postHandler := api.NewPostHandler(postService)
+	postService := core.NewPostService(postRepository,*jobRepository)
+	postHandler := api.NewPostHandler(postService, *authService)
+
 	interactionRepository := repository.NewInteractionRepository(db)
 	interactionService := core.NewInteractionService(interactionRepository)
 	interactionHandler := api.NewInteractionHandler(interactionService)
@@ -68,6 +67,7 @@ func main() {
 			r.Post("/", postHandler.CreatePost)
 			r.Put("/{id}", postHandler.EditPost)
 			r.Get("/{id}", postHandler.GetByID)
+			r.Delete("/{id}", postHandler.DeletePost)
 			r.Post("/{id}/reactions", interactionHandler.TogglePostReaction)
 			r.Get("/{id}/reactions", interactionHandler.GetPostReactions)
 		})
@@ -106,10 +106,10 @@ func main() {
 		})
 	})
 
-	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	//port := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	port := ":8080"
 	log.Printf("Server starting on port %s", port)
 	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
-

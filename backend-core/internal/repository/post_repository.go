@@ -5,12 +5,15 @@ import (
 
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PostRepo interface {
-	EditPost(ctx context.Context, postID uint, p model.Post) (model.Post, error)
+	EditPost(ctx context.Context, postID string, p model.Post) (model.Post, error)
 	CreatePost(ctx context.Context, post *model.Post) error
-	GetByID(ctx context.Context, id uint) (*model.Post, error)
+	GetByID(ctx context.Context, id string) (*model.Post, error)
+	DeletePost(ctx context.Context, id string) (*model.Post, error)
+	IsAlreadyDeleted(ctx context.Context, id string) bool
 }
 
 type postRepository struct {
@@ -21,26 +24,31 @@ func NewPostRepository(db *gorm.DB) PostRepo {
 	return &postRepository{db: db}
 }
 
-func (r *postRepository) GetByID(ctx context.Context, id uint) (*model.Post, error) {
+func (r *postRepository) GetByID(ctx context.Context, id string) (*model.Post, error) {
 	var post model.Post
 
-    err := r.db.WithContext(ctx).
-        Preload("Images").
-        Preload("Company").
+	err := r.db.WithContext(ctx).
         Preload("User").
+        Preload("Company").
+		Preload("Company").
         Preload("Job").
-        Preload("Comments").Preload("Comments.User").
-        Preload("Interactions").
-        First(&post, id).Error
-    return &post, err
+        Preload("Images").
+		Preload("Interactions").
+        Preload("Interactions.User").
+        Preload("Interactions.Reaction").
+        Preload("Comments.User"). 
+		Preload("Comments").
+        First(&post,"id = ?", id).Error
+
+	return &post, err
 }
 
-func (r *postRepository) EditPost(ctx context.Context, postID uint, p model.Post) (model.Post, error) {
+func (r *postRepository) EditPost(ctx context.Context, postID string, p model.Post) (model.Post, error) {
 	var editedPost model.Post
 
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-		if err := tx.First(&editedPost, postID).Error; err != nil {
+		if err := tx.First(&editedPost, "posts.id = ?",postID).Error; err != nil {
 			return err
 		}
 
@@ -68,17 +76,33 @@ func (r *postRepository) EditPost(ctx context.Context, postID uint, p model.Post
 		return model.Post{}, err
 	}
 
-	err = r.db.WithContext(ctx).
-		Preload("Comments").
-		Preload("Interactions").
-		Preload("Images").
-		First(&editedPost, postID).Error
-
-	return editedPost, err
+	res, err := r.GetByID(ctx, postID)
+	if err != nil {
+		return model.Post{}, err
+	}
+	return *res, nil
 }
 func (r *postRepository) CreatePost(ctx context.Context, post *model.Post) error {
 	if err := r.db.WithContext(ctx).Create(post).Error; err != nil {
-        return err
-    }
-    return nil
+		return err
+	}
+	return nil
+}
+
+func (r *postRepository) DeletePost(ctx context.Context, id string) (*model.Post, error) {
+	post := model.Post{ID: id}
+
+	if err := r.db.WithContext(ctx).Clauses(clause.Returning{}).Delete(&post).Error; err != nil {
+		return nil, err
+	}
+	return &post, nil
+}
+
+func (r *postRepository) IsAlreadyDeleted(ctx context.Context, id string) bool {
+	post := model.Post{ID: id}
+
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&post).Error; err != nil {
+		return true
+	}
+	return false
 }
